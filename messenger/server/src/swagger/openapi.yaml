@@ -1,0 +1,171 @@
+openapi: 3.0.0
+info:
+  title: Messenger Mini API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001
+paths:
+  /auth/login:
+    post:
+      summary: Login by phone and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+  /users/me:
+    get:
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+    put:
+      summary: Update nickname or bio
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /messages:
+    get:
+      summary: Get message history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '401':
+          description: Unauthorized
+    post:
+      summary: Send a new message
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '201':
+          description: Created message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          description: Unauthorized
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: u1
+        nickname:
+          type: string
+          example: Alex
+        phone:
+          type: string
+          example: "+79990000000"
+        bio:
+          type: string
+          example: Student
+    LoginRequest:
+      type: object
+      required:
+        - phone
+        - password
+      properties:
+        phone:
+          type: string
+          example: "+79990000000"
+        password:
+          type: string
+          example: "123456"
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: token-u1
+        user:
+          $ref: '#/components/schemas/User'
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          example: m1
+        userId:
+          type: string
+          example: u1
+        author:
+          type: string
+          example: Alex
+        text:
+          type: string
+          example: "Привет"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-03-16T10:00:00Z"
+    SendMessageRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          example: "Новое сообщение"
+    UpdateProfileRequest:
+      type: object
+      properties:
+        nickname:
+          type: string
+          example: "Alex"
+        bio:
+          type: string
+          example: "Student"
